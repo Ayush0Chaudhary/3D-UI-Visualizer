@@ -95,8 +95,8 @@ export default function App() {
                 setSelectedElement(editedElement); // Update selected element with new data
                 setIsHighlightModified(false);
                 
-                // Auto-save to localStorage
-                if (isZipUploaded && screens[currentScreenIndex]) {
+                // Auto-save to localStorage (only for ZIP upload mode)
+                if (isZipUploaded && screens.length > 0 && screens[currentScreenIndex]) {
                     saveToLocalStorage(screens[currentScreenIndex].number, updatedJson);
                 }
                 
@@ -322,7 +322,7 @@ export default function App() {
     const handleVisualize = useCallback(() => {
         setIsLoading(true);
         const { scene, mainGroup, camera, controls } = threeJsObjects.current;
-        if (!scene || !isZipUploaded) {
+        if (!scene) {
              setIsLoading(false);
              return;
         }
@@ -458,7 +458,7 @@ export default function App() {
         const currentMount = mountRef.current;
         
         // Only initialize Three.js if we're in the labeling interface and mount exists
-        if (!currentMount || !isZipUploaded) {
+        if (!currentMount) {
             return;
         }
         
@@ -600,6 +600,19 @@ export default function App() {
                                     <span className="text-gray-400">Processing ZIP file...</span>
                                 </div>
                             )}
+                            
+                            <div className="mt-8 pt-6 border-t border-gray-600">
+                                <p className="text-gray-400 text-sm mb-4">Or continue with manual labeling:</p>
+                                <button
+                                    onClick={() => setIsZipUploaded(true)}
+                                    className="w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition duration-300 flex items-center justify-center gap-2"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Start Manual Labeling
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -817,32 +830,34 @@ export default function App() {
                         </div>
                     )}
 
-                    {/* Navigation Controls */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-40">
-                        <button
-                            onClick={handlePreviousScreen}
-                            disabled={currentScreenIndex === 0}
-                            className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center gap-2"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Previous
-                        </button>
-                        <div className="bg-gray-800 text-white px-4 py-2 rounded-lg">
-                            Screen {currentScreenIndex + 1} of {screens.length}
+                    {/* Navigation Controls - Only show for ZIP upload mode */}
+                    {isZipUploaded && screens.length > 0 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-40">
+                            <button
+                                onClick={handlePreviousScreen}
+                                disabled={currentScreenIndex === 0}
+                                className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Previous
+                            </button>
+                            <div className="bg-gray-800 text-white px-4 py-2 rounded-lg">
+                                Screen {currentScreenIndex + 1} of {screens.length}
+                            </div>
+                            <button
+                                onClick={handleNextScreen}
+                                disabled={currentScreenIndex === screens.length - 1}
+                                className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center gap-2"
+                            >
+                                Next
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
-                        <button
-                            onClick={handleNextScreen}
-                            disabled={currentScreenIndex === screens.length - 1}
-                            className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center gap-2"
-                        >
-                            Next
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </div>
+                    )}
                 </div>
             </div>
             )}
